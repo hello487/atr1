@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - 云服务器售卖系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .captcha-input {
+            flex: 1;
+        }
+
+        .captcha-image {
+            width: 120px;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .refresh-captcha {
+            padding: 0.5rem 1rem;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .refresh-captcha:hover {
+            background: #e0e0e0;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            color: #27ae60;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>管理员登录</h1>
+            <p>云服务器售卖系统管理后台</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="captcha">验证码</label>
+                <div class="captcha-container">
+                    <input type="text" id="captcha" name="captcha" class="captcha-input" required maxlength="6">
+                    <img id="captchaImage" class="captcha-image" alt="验证码">
+                    <button type="button" class="refresh-captcha" id="refreshCaptcha">刷新</button>
+                </div>
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">登录</button>
+            <div id="message"></div>
+        </form>
+    </div>
+
+    <script>
+        let currentCaptchaId = null;
+
+        // 获取验证码
+        async function fetchCaptcha() {
+            try {
+                const response = await fetch('/api/captcha');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentCaptchaId = result.data.captchaId;
+                    // 使用更健壮的方式处理SVG数据
+                    const svgData = result.data.svg;
+                    // 确保正确编码SVG数据为base64
+                    const encodedSvg = btoa(unescape(encodeURIComponent(svgData)));
+                    const captchaImage = document.getElementById('captchaImage');
+                    captchaImage.src = 'data:image/svg+xml;base64,' + encodedSvg;
+                    
+                    // 添加错误处理
+                    captchaImage.onerror = function() {
+                        console.error('验证码图像加载失败');
+                        showMessage('验证码加载失败，请刷新重试', 'error');
+                    };
+                } else {
+                    showMessage('获取验证码失败', 'error');
+                }
+            } catch (error) {
+                console.error('获取验证码错误:', error);
+                showMessage('网络错误，获取验证码失败', 'error');
+            }
+        }
+
+        // 显示消息
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.className = type === 'error' ? 'error-message' : 'success-message';
+            messageEl.textContent = text;
+            
+            // 3秒后自动清除消息
+            setTimeout(() => {
+                messageEl.textContent = '';
+                messageEl.className = '';
+            }, 3000);
+        }
+
+        // 页面加载完成后获取验证码
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchCaptcha();
+        });
+
+        // 刷新验证码
+        document.getElementById('refreshCaptcha').addEventListener('click', function(e) {
+            e.preventDefault();
+            fetchCaptcha();
+        });
+
+        // 点击验证码图片刷新
+        document.getElementById('captchaImage').addEventListener('click', function() {
+            fetchCaptcha();
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const captchaText = document.getElementById('captcha').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const messageEl = document.getElementById('message');
+            
+            // 清除之前的消息
+            messageEl.className = '';
+            messageEl.textContent = '';
+            
+            // 验证输入
+            if (!username || !password || !captchaText) {
+                showMessage('请填写所有字段', 'error');
+                return;
+            }
+            
+            // 验证验证码长度
+            if (captchaText.length !== 6) {
+                showMessage('验证码长度应为6位', 'error');
+                return;
+            }
+            
+            // 禁用登录按钮
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登录中...';
+            
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        username, 
+                        password,
+                        captchaId: currentCaptchaId,
+                        captchaText
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // 保存令牌到 localStorage
+                    localStorage.setItem('adminToken', result.data.token);
+                    localStorage.setItem('adminInfo', JSON.stringify(result.data.admin));
+                    
+                    // 显示成功消息
+                    showMessage('登录成功，正在跳转...', 'success');
+                    
+                    // 跳转到管理面板
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard.html';
+                    }, 1000);
+                } else {
+                    // 显示错误消息
+                    showMessage(result.message, 'error');
+                    // 刷新验证码
+                    fetchCaptcha();
+                    // 清空验证码输入框
+                    document.getElementById('captcha').value = '';
+                }
+            } catch (error) {
+                showMessage('网络错误，请稍后重试', 'error');
+                // 刷新验证码
+                fetchCaptcha();
+            } finally {
+                // 恢复登录按钮
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登录';
+            }
+        });
+    </script>
+</body>
+</html>

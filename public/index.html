@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云服务器售卖系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1e3e, #1a3a6c, #2a5a9e);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 装饰元素 */
+        .decoration {
+            position: absolute;
+            z-index: 0;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            filter: blur(15px);
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* 导航栏 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(10, 30, 60, 0.7);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(100, 180, 255, 0.3);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #64d8ff;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            font-size: 28px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin: 0 20px;
+        }
+        
+        .nav-links a {
+            color: #e0f7ff;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: #64ffda;
+            background: rgba(100, 255, 218, 0.1);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: #64ffda;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 70%;
+        }
+        
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .login-btn, .register-btn {
+            background: transparent;
+            border: 1px solid #64d8ff;
+            color: #64d8ff;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        
+        .login-btn:hover, .register-btn:hover {
+            background: rgba(100, 216, 255, 0.2);
+        }
+        
+        .register-btn {
+            border-color: #64ffda;
+            color: #64ffda;
+        }
+        
+        /* 主内容区 */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            padding: 50px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .left-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mascot {
+            max-width: 90%;
+            max-height: 80vh;
+            filter: drop-shadow(0 0 20px rgba(100, 216, 255, 0.5));
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 50px;
+        }
+        
+        .title {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #64d8ff, #64ffda, #a164ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            font-family: 'Arial Rounded MT Bold', 'Microsoft YaHei UI', sans-serif;
+        }
+        
+        .title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 0;
+            width: 200px;
+            height: 5px;
+            background: linear-gradient(to right, #64d8ff, #64ffda);
+            border-radius: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.8rem;
+            margin-bottom: 40px;
+            color: #c2e9ff;
+            max-width: 80%;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #1e90ff, #64ffda);
+            color: #0c1e3e;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 5px 25px rgba(30, 144, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            z-index: 1;
+            width: fit-content;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(30, 144, 255, 0.7);
+        }
+        
+        .start-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .start-btn:hover::before {
+            left: 100%;
+        }
+        
+        .features {
+            display: flex;
+            margin-top: 50px;
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background: rgba(16, 42, 83, 0.6);
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            width: 180px;
+            text-align: center;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: rgba(26, 65, 128, 0.7);
+        }
+        
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #64ffda;
+            margin-bottom: 15px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #64d8ff;
+        }
+        
+        .feature-card p {
+            font-size: 0.9rem;
+            color: #a4d2ff;
+        }
+        
+        /* 动画 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .title {
+                font-size: 4rem;
+            }
+            
+            .subtitle {
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .left-panel {
+                margin-bottom: 50px;
+            }
+            
+            .right-panel {
+                align-items: center;
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .title::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            
+            .subtitle {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .title {
+                font-size: 3rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .features {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰元素 -->
+    <div class="decoration cloud" style="width: 300px; height: 100px; top: 10%; left: 5%;"></div>
+    <div class="decoration cloud" style="width: 250px; height: 80px; top: 25%; right: 10%;"></div>
+    <div class="decoration cloud" style="width: 200px; height: 70px; bottom: 15%; left: 15%;"></div>
+    
+    <div class="decoration star" style="width: 3px; height: 3px; top: 20%; left: 20%;"></div>
+    <div class="decoration star" style="width: 4px; height: 4px; top: 45%; left: 30%; animation-delay: 0.5s;"></div>
+    <div class="decoration star" style="width: 2px; height: 2px; top: 60%; left: 80%; animation-delay: 1s;"></div>
+    <div class="decoration star" style="width: 3px; height: 3px; top: 35%; left: 75%; animation-delay: 1.5s;"></div>
+    
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-cloud"></i>
+            <span>云服务器系统</span>
+        </div>
+        
+        <ul class="nav-links">
+            <li><a href="#"><i class="fas fa-home"></i> 首页</a></li>
+            <li><a href="buy.html"><i class="fas fa-server"></i> 产品</a></li>
+            <li><a href="#"><i class="fas fa-info-circle"></i> 关于</a></li>
+            <li><a href="#"><i class="fas fa-question-circle"></i> 帮助</a></li>
+            <li><a href="#"><i class="fas fa-envelope"></i> 联系</a></li>
+        </ul>
+        
+        <div class="user-actions">
+            <a href="login" class="login-btn"><i class="fas fa-sign-in-alt"></i> 登录/注册</a>
+        </div>
+    </nav>
+    
+    <!-- 主内容区 -->
+    <div class="container">
+        <div class="left-panel">
+            <!-- 看板娘图片 -->
+            <img src="/img/kbn.png" alt="看板娘" class="mascot">
+        </div>
+        
+        <div class="right-panel">
+            <h1 class="title">云服务器<br>即刻拥有</h1>
+            <p class="subtitle">开启您的云端之旅，体验极速稳定的服务器服务，为您的梦想提供强大的计算动力</p>
+            <a href="buy.html" class="start-btn"><i class="fas fa-shopping-cart"></i> 立即购买</a>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-bolt"></i>
+                    <h3>极速性能</h3>
+                    <p>高速SSD与优化网络</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>安全可靠</h3>
+                    <p>企业级防护措施</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-sync-alt"></i>
+                    <h3>弹性扩展</h3>
+                    <p>随时调整资源配置</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 创建更多装饰元素
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.querySelector('body');
+            
+            // 创建更多云朵
+            for (let i = 0; i < 5; i++) {
+                const cloud = document.createElement('div');
+                cloud.classList.add('cloud');
+                cloud.style.width = Math.random() * 200 + 100 + 'px';
+                cloud.style.height = Math.random() * 60 + 40 + 'px';
+                cloud.style.top = Math.random() * 100 + '%';
+                cloud.style.left = Math.random() * 100 + '%';
+                body.appendChild(cloud);
+            }
+            
+            // 创建更多星星
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 3 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                body.appendChild(star);
+            }
+        });
+    </script>
+</body>
+</html>
