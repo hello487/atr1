@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云服务器配置系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c1e3e, #1a3a6c, #2a5a9e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 装饰元素 */
+        .decoration {
+            position: absolute;
+            z-index: 0;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            filter: blur(15px);
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(16, 42, 83, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            padding: 20px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px 0;
+        }
+        
+        h1 {
+            color: #64d8ff;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #64d8ff, #64ffda, #a164ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: #c2e9ff;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .config-section {
+            flex: 3;
+        }
+        
+        .config-box {
+            background: rgba(16, 42, 83, 0.6);
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+        
+        .config-box-title {
+            font-size: 1.3rem;
+            color: #64d8ff;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(100, 180, 255, 0.3);
+        }
+        
+        .notes-title {
+            font-size: 1.3rem;
+            color: #64d8ff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .price-summary-title {
+            font-size: 1.3rem;
+            color: #64d8ff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .notes-container {
+            background: rgba(16, 42, 83, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            margin-top: 20px;
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+        
+        .notes-title {
+            font-size: 1.3rem;
+            color: #64d8ff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .notes-list {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        
+        .notes-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(100, 180, 255, 0.3);
+            color: #a4d2ff;
+        }
+        
+        .notes-item:last-child {
+            border-bottom: none;
+        }
+        
+        .notes-item:before {
+            content: "•";
+            color: #64ffda;
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-right: 10px;
+        }
+        
+        .price-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .config-container {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .slider-container {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(100, 180, 255, 0.3);
+        }
+        
+        .slider-container:last-child {
+            border-bottom: none;
+        }
+        
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 3px 0;
+        }
+        
+        .config-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(100, 216, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: #64ffda;
+            flex-shrink: 0;
+        }
+        
+        .config-label {
+            font-weight: 600;
+            color: #c2e9ff;
+            min-width: 70px;
+            font-size: 0.95rem;
+        }
+        
+        .slider-wrapper {
+            flex: 1;
+        }
+        
+        .slider-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3px;
+        }
+        
+        .slider-label {
+            font-weight: 500;
+            color: #a4d2ff;
+            font-size: 0.8rem;
+        }
+        
+        .slider-value {
+            font-weight: 700;
+            color: #ffa726; /* 橙色数字，更醒目 */
+            font-size: 1rem;
+            min-width: 25px;
+            text-align: right;
+            text-shadow: 0 0 8px rgba(255, 167, 38, 0.5);
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: rgba(100, 180, 255, 0.3);
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #64ffda;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .slider::-webkit-slider-thumb:hover {
+            background: #64d8ff;
+            transform: scale(1.1);
+        }
+        
+        .price-summary-container {
+            background: rgba(16, 42, 83, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+        
+        .price-summary-title {
+            font-size: 1.3rem;
+            color: #64d8ff;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .price-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        
+        .price-item-label {
+            color: #a4d2ff;
+        }
+        
+        .price-item-value {
+            font-weight: 600;
+            color: #ffa726; /* 橙色数字，更醒目 */
+            text-shadow: 0 0 8px rgba(255, 167, 38, 0.5);
+        }
+        
+        .price-divider {
+            height: 1px;
+            background: rgba(100, 180, 255, 0.3);
+            margin: 5px 0;
+        }
+        
+        .total-price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(100, 180, 255, 0.3);
+        }
+        
+        .total-price-label {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #c2e9ff;
+        }
+        
+        .total-price-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffca28; /* 金黄色总价，更突出 */
+            text-shadow: 0 0 10px rgba(255, 202, 40, 0.7);
+        }
+        
+        .price-container {
+            background: rgba(16, 42, 83, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            color: #fff;
+            position: sticky;
+            top: 10px;
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+        }
+        
+        .price-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #c2e9ff;
+        }
+        
+        .total-price {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 5px 0;
+            color: #ffca28; /* 金黄色总价，更突出 */
+            text-shadow: 0 0 15px rgba(255, 202, 40, 0.8);
+        }
+        
+        .price-details-text {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #a4d2ff;
+        }
+        
+        .buy-btn {
+            background: linear-gradient(45deg, #1e90ff, #64ffda);
+            color: #0c1e3e;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .buy-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(30, 144, 255, 0.7);
+        }
+        
+        .buy-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .buy-btn:hover::before {
+            left: 100%;
+        }
+        
+        .buy-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .unit {
+            font-size: 0.9rem;
+            color: #a4d2ff;
+            margin-left: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .total-price {
+                font-size: 2.5rem;
+            }
+            
+            .slider-row {
+                flex-wrap: wrap;
+            }
+            
+            .config-label {
+                min-width: auto;
+            }
+            
+            .price-section-bottom {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰元素 -->
+    <div class="decoration cloud" style="width: 300px; height: 100px; top: 10%; left: 5%;"></div>
+    <div class="decoration cloud" style="width: 250px; height: 80px; top: 25%; right: 10%;"></div>
+    <div class="decoration cloud" style="width: 200px; height: 70px; bottom: 15%; left: 15%;"></div>
+    
+    <div class="decoration star" style="width: 3px; height: 3px; top: 20%; left: 20%;"></div>
+    <div class="decoration star" style="width: 4px; height: 4px; top: 45%; left: 30%; animation-delay: 0.5s;"></div>
+    <div class="decoration star" style="width: 2px; height: 2px; top: 60%; left: 80%; animation-delay: 1s;"></div>
+    <div class="decoration star" style="width: 3px; height: 3px; top: 35%; left: 75%; animation-delay: 1.5s;"></div>
+    
+    <div class="container">
+        <header>
+            <h1>云服务器配置系统</h1>
+            <p class="subtitle">通过滑动条调整您的服务器配置，系统将实时计算价格</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="config-section">
+                <div class="config-box">
+                    <h2 class="config-box-title">服务器配置选项</h2>
+                    <div class="config-container">
+                        <div class="slider-container">
+                            <div class="slider-row">
+                                <div class="config-icon">
+                                    <i class="fas fa-microchip"></i>
+                                </div>
+                                <div class="config-label">CPU核心</div>
+                                <div class="slider-wrapper">
+                                    <input type="range" min="1" max="32" value="4" class="slider" id="cpu-slider">
+                                    <div class="slider-info">
+                                        <span class="slider-label">1 核</span>
+                                        <span class="slider-label">32 核</span>
+                                    </div>
+                                </div>
+                                <div class="slider-value" id="cpu-value">4</div>
+                            </div>
+                        </div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-row">
+                                <div class="config-icon">
+                                    <i class="fas fa-memory"></i>
+                                </div>
+                                <div class="config-label">内存</div>
+                                <div class="slider-wrapper">
+                                    <input type="range" min="1" max="128" value="16" class="slider" id="memory-slider">
+                                    <div class="slider-info">
+                                        <span class="slider-label">1 GB</span>
+                                        <span class="slider-label">128 GB</span>
+                                    </div>
+                                </div>
+                                <div class="slider-value" id="memory-value">16</div>
+                            </div>
+                        </div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-row">
+                                <div class="config-icon">
+                                    <i class="fas fa-hdd"></i>
+                                </div>
+                                <div class="config-label">硬盘</div>
+                                <div class="slider-wrapper">
+                                    <input type="range" min="20" max="2048" value="500" class="slider" id="disk-slider">
+                                    <div class="slider-info">
+                                        <span class="slider-label">20 GB</span>
+                                        <span class="slider-label">2 TB</span>
+                                    </div>
+                                </div>
+                                <div class="slider-value" id="disk-value">500</div>
+                            </div>
+                        </div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-row">
+                                <div class="config-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <div class="config-label">带宽</div>
+                                <div class="slider-wrapper">
+                                    <input type="range" min="10" max="1000" value="100" class="slider" id="bandwidth-slider">
+                                    <div class="slider-info">
+                                        <span class="slider-label">10 Mbps</span>
+                                        <span class="slider-label">1 Gbps</span>
+                                    </div>
+                                </div>
+                                <div class="slider-value" id="bandwidth-value">100</div>
+                            </div>
+                        </div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-row">
+                                <div class="config-icon">
+                                    <i class="fas fa-plug"></i>
+                                </div>
+                                <div class="config-label">端口</div>
+                                <div class="slider-wrapper">
+                                    <input type="range" min="1" max="20" value="5" class="slider" id="port-slider">
+                                    <div class="slider-info">
+                                        <span class="slider-label">1 个</span>
+                                        <span class="slider-label">20 个</span>
+                                    </div>
+                                </div>
+                                <div class="slider-value" id="port-value">5</div>
+                            </div>
+                        </div>
+                        
+                        <div class="slider-container">
+                            <div class="slider-row">
+                                <div class="config-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="config-label">使用时间</div>
+                                <div class="slider-wrapper">
+                                    <input type="range" min="1" max="36" value="12" class="slider" id="time-slider">
+                                    <div class="slider-info">
+                                        <span class="slider-label">1 月</span>
+                                        <span class="slider-label">36 月</span>
+                                    </div>
+                                </div>
+                                <div class="slider-value" id="time-value">12</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notes-container">
+                    <h2 class="notes-title">注意事项</h2>
+                    <ul class="notes-list">
+                        <li class="notes-item">价格已包含所有资源费用，无隐藏收费</li>
+                        <li class="notes-item">配置可随时调整，按实际使用情况计费</li>
+                        <li class="notes-item">费用按月结算，支持提前退订</li>
+                        <li class="notes-item">服务提供7×24小时技术支持</li>
+                        <li class="notes-item">所有配置即刻生效，无需等待</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="price-section">
+                <div class="price-summary-container">
+                    <h2 class="price-summary-title">价格明细</h2>
+                    <div class="price-details">
+                        <div class="price-item">
+                            <span class="price-item-label">CPU核心费用 (4核 × ¥10/月)</span>
+                            <span class="price-item-value">¥40.00</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="price-item-label">内存费用 (16GB × ¥5/月)</span>
+                            <span class="price-item-value">¥80.00</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="price-item-label">硬盘费用 (500GB × ¥0.1/月)</span>
+                            <span class="price-item-value">¥50.00</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="price-item-label">带宽费用 (100Mbps × ¥0.5/月)</span>
+                            <span class="price-item-value">¥50.00</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="price-item-label">端口费用 (5个 × ¥2/月)</span>
+                            <span class="price-item-value">¥10.00</span>
+                        </div>
+                        <div class="price-divider"></div>
+                        <div class="price-item">
+                            <span class="price-item-label">月费用小计</span>
+                            <span class="price-item-value">¥230.00</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="price-item-label">使用时长 (12个月)</span>
+                            <span class="price-item-value">× 12</span>
+                        </div>
+                        <div class="total-price-row">
+                            <span class="total-price-label">总计费用</span>
+                            <span class="total-price-value">¥2760.00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="price-section-bottom">
+                    <div class="price-container">
+                        <h2 class="price-title">您的服务器配置总价</h2>
+                        <div class="total-price">¥<span id="total-price">2760.00</span></div>
+                        <p class="price-details-text">价格已包含所有资源费用，按需付费，随时调整</p>
+                        <button class="buy-btn">立即购买</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 价格计算参数
+        const priceParams = {
+            cpu: 10,      // 每核心每月价格
+            memory: 5,    // 每GB每月价格
+            disk: 0.1,    // 每GB每月价格
+            bandwidth: 0.5, // 每Mbps每月价格
+            port: 2,      // 每个端口每月价格
+        };
+        
+        // 获取所有滑块元素
+        const cpuSlider = document.getElementById('cpu-slider');
+        const memorySlider = document.getElementById('memory-slider');
+        const diskSlider = document.getElementById('disk-slider');
+        const bandwidthSlider = document.getElementById('bandwidth-slider');
+        const portSlider = document.getElementById('port-slider');
+        const timeSlider = document.getElementById('time-slider');
+        
+        // 获取所有显示值的元素
+        const cpuValue = document.getElementById('cpu-value');
+        const memoryValue = document.getElementById('memory-value');
+        const diskValue = document.getElementById('disk-value');
+        const bandwidthValue = document.getElementById('bandwidth-value');
+        const portValue = document.getElementById('port-value');
+        const timeValue = document.getElementById('time-value');
+        
+        // 获取总价元素
+        const totalPrice = document.getElementById('total-price');
+        
+        // 获取价格明细元素
+        const priceDetails = document.querySelector('.price-details');
+        
+        // 初始化滑块事件监听
+        cpuSlider.addEventListener('input', updatePrice);
+        memorySlider.addEventListener('input', updatePrice);
+        diskSlider.addEventListener('input', updatePrice);
+        bandwidthSlider.addEventListener('input', updatePrice);
+        portSlider.addEventListener('input', updatePrice);
+        timeSlider.addEventListener('input', updatePrice);
+        
+        // 更新显示值和总价
+        function updatePrice() {
+            // 更新显示值
+            cpuValue.textContent = cpuSlider.value;
+            memoryValue.textContent = memorySlider.value;
+            diskValue.textContent = diskSlider.value;
+            bandwidthValue.textContent = bandwidthSlider.value;
+            portValue.textContent = portSlider.value;
+            timeValue.textContent = timeSlider.value;
+            
+            // 计算价格
+            const cpuCost = parseInt(cpuSlider.value) * priceParams.cpu;
+            const memoryCost = parseInt(memorySlider.value) * priceParams.memory;
+            const diskCost = parseInt(diskSlider.value) * priceParams.disk;
+            const bandwidthCost = parseInt(bandwidthSlider.value) * priceParams.bandwidth;
+            const portCost = parseInt(portSlider.value) * priceParams.port;
+            
+            // 月费用
+            const monthlyCost = cpuCost + memoryCost + diskCost + bandwidthCost + portCost;
+            
+            // 总费用（乘以月数）
+            const totalCost = monthlyCost * parseInt(timeSlider.value);
+            
+            // 更新总价显示
+            totalPrice.textContent = totalCost.toFixed(2);
+            
+            // 更新价格明细
+            updatePriceDetails(cpuCost, memoryCost, diskCost, bandwidthCost, portCost, monthlyCost, totalCost);
+        }
+        
+        // 更新价格明细
+        function updatePriceDetails(cpuCost, memoryCost, diskCost, bandwidthCost, portCost, monthlyCost, totalCost) {
+            // 更新各项费用显示
+            const priceItems = document.querySelectorAll('.price-item-value');
+            priceItems[0].textContent = '¥' + cpuCost.toFixed(2);
+            priceItems[1].textContent = '¥' + memoryCost.toFixed(2);
+            priceItems[2].textContent = '¥' + diskCost.toFixed(2);
+            priceItems[3].textContent = '¥' + bandwidthCost.toFixed(2);
+            priceItems[4].textContent = '¥' + portCost.toFixed(2);
+            priceItems[5].textContent = '¥' + monthlyCost.toFixed(2);
+            priceItems[6].textContent = '× ' + timeSlider.value;
+            document.querySelector('.total-price-value').textContent = '¥' + totalCost.toFixed(2);
+        }
+        
+        // 页面加载时初始化价格
+        document.addEventListener('DOMContentLoaded', updatePrice);
+        
+        // 购买按钮事件
+        document.querySelector('.buy-btn').addEventListener('click', function() {
+            // 获取配置参数
+            const cpu = parseInt(cpuSlider.value);
+            const memory = parseInt(memorySlider.value);
+            const disk = parseInt(diskSlider.value);
+            const bandwidth = parseInt(bandwidthSlider.value);
+            const port = parseInt(portSlider.value);
+            const months = parseInt(timeSlider.value);
+            
+            // 在实际应用中，这里应该发送请求到后端创建订单
+            // 然后跳转到支付页面
+            alert('订单已创建，即将跳转到支付页面');
+            window.location.href = 'payment.html';
+        });
+        
+        // 创建更多装饰元素
+        document.addEventListener('DOMContentLoaded', function() {
+            const body = document.querySelector('body');
+            
+            // 创建更多云朵
+            for (let i = 0; i < 5; i++) {
+                const cloud = document.createElement('div');
+                cloud.classList.add('cloud');
+                cloud.style.width = Math.random() * 200 + 100 + 'px';
+                cloud.style.height = Math.random() * 60 + 40 + 'px';
+                cloud.style.top = Math.random() * 100 + '%';
+                cloud.style.left = Math.random() * 100 + '%';
+                body.appendChild(cloud);
+            }
+            
+            // 创建更多星星
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 3 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                body.appendChild(star);
+            }
+        });
+    </script>
+</body>
+</html>

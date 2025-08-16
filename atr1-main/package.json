@@ -1,0 +1,56 @@
+{
+  "name": "cloud-server-backend",
+  "version": "1.0.0",
+  "description": "云服务器售卖系统后端服务，基于 Node.js 和 Express 构建，提供服务器配置信息 API、实时计算服务器价格、订单创建和管理、用户注册和登录等功能",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init-db": "node db/init.js",
+    "init-admin": "node init-admin.js",
+    "test-db": "node db/test.js",
+    "build": "echo 'Building project...' && npm install --production",
+    "pack": "npm pack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cloud",
+    "server",
+    "nodejs",
+    "express",
+    "e-commerce",
+    "idc",
+    "vps",
+    "云服务器",
+    "售卖系统"
+  ],
+  "author": "yang3526",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/example/cloud-server-backend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/example/cloud-server-backend/issues"
+  },
+  "homepage": "https://github.com/example/cloud-server-backend#readme",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "dependencies": {
+    "alipay-sdk": "^3.2.0",
+    "axios": "^1.6.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0",
+    "svg-captcha": "^1.4.0",
+    "tencentcloud-sdk-nodejs": "^4.0.504",
+    "wechatpay-node-v3": "^2.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
