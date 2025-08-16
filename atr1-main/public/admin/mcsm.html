@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCSM管理 - 云服务器售卖系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 20px;
+            text-align: center;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .instance-card {
+            background: #f7fafc;
+            border-radius: 10px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .instance-card.running {
+            border-left-color: #48bb78;
+        }
+
+        .instance-card.stopped {
+            border-left-color: #f56565;
+        }
+
+        .instance-card h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .instance-info {
+            margin-bottom: 15px;
+        }
+
+        .instance-info span {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-running {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-stopped {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #742a2a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .log-container {
+            background: #1a202c;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .binding-item {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .binding-item h4 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .binding-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .permissions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .permission-tag {
+            background: #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>MCSM管理面板</h1>
+            <p>管理MCSM实例、用户和绑定关系</p>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('instances')">实例管理</button>
+            <button class="nav-tab" onclick="showTab('users')">用户管理</button>
+            <button class="nav-tab" onclick="showTab('bindings')">绑定管理</button>
+            <button class="nav-tab" onclick="showTab('system')">系统信息</button>
+        </div>
+
+        <div id="instances" class="tab-content active">
+            <div class="card">
+                <h2>MCSM实例列表</h2>
+                <button class="btn btn-primary" onclick="refreshInstances()">刷新实例</button>
+                <div id="instances-container" class="grid"></div>
+            </div>
+        </div>
+
+        <div id="users" class="tab-content">
+            <div class="card">
+                <h2>MCSM用户管理</h2>
+                <button class="btn btn-primary" onclick="refreshUsers()">刷新用户</button>
+                <button class="btn btn-success" onclick="showCreateUserModal()">创建用户</button>
+                <div id="users-container"></div>
+            </div>
+        </div>
+
+        <div id="bindings" class="tab-content">
+            <div class="card">
+                <h2>用户实例绑定</h2>
+                <button class="btn btn-primary" onclick="refreshBindings()">刷新绑定</button>
+                <button class="btn btn-success" onclick="showBindModal()">创建绑定</button>
+                <div id="bindings-container"></div>
+            </div>
+        </div>
+
+        <div id="system" class="tab-content">
+            <div class="card">
+                <h2>系统信息</h2>
+                <button class="btn btn-primary" onclick="refreshSystemInfo()">刷新信息</button>
+                <div id="system-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('createUserModal')">&times;</span>
+            <h2>创建MCSM用户</h2>
+            <form id="createUserForm">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="permission">权限</label>
+                    <select id="permission" name="permission">
+                        <option value="user">用户</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">创建用户</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="bindModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('bindModal')">&times;</span>
+            <h2>绑定用户到实例</h2>
+            <form id="bindForm">
+                <div class="form-group">
+                    <label for="bindUserId">用户ID</label>
+                    <input type="text" id="bindUserId" name="userId" required>
+                </div>
+                <div class="form-group">
+                    <label for="bindInstanceId">实例ID</label>
+                    <input type="text" id="bindInstanceId" name="instanceId" required>
+                </div>
+                <div class="form-group">
+                    <label for="permissions">权限</label>
+                    <select id="permissions" name="permissions" multiple>
+                        <option value="read">读取</option>
+                        <option value="write">写入</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">创建绑定</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="logModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('logModal')">&times;</span>
+            <h2>控制台日志</h2>
+            <div id="logContainer" class="log-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
+            window.location.href = '/admin';
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            
+            event.target.classList.add('active');
+            
+            switch(tabName) {
+                case 'instances':
+                    loadInstances();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+                case 'bindings':
+                    loadBindings();
+                    break;
+                case 'system':
+                    loadSystemInfo();
+                    break;
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        async function loadInstances() {
+            const container = document.getElementById('instances-container');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                const response = await fetch('/api/mcsm/instances', {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayInstances(result.data);
+                } else {
+                    container.innerHTML = `<div class="error">${result.message}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">加载失败: ${error.message}</div>`;
+            }
+        }
+
+        function displayInstances(instances) {
+            const container = document.getElementById('instances-container');
+            
+            if (instances.length === 0) {
+                container.innerHTML = '<div class="loading">没有找到实例</div>';
+                return;
+            }
+            
+            container.innerHTML = instances.map(instance => `
+                <div class="instance-card ${instance.status}">
+                    <h3>${instance.config.nickname}</h3>
+                    <div class="instance-info">
+                        <span class="status-badge status-${instance.status}">${instance.status}</span>
+                        <span>ID: ${instance.uuid}</span>
+                        <span>端口: ${instance.config.port || 25565}</span>
+                    </div>
+                    <div>
+                        <button class="btn btn-success" onclick="startInstance('${instance.uuid}')" ${instance.status === 'running' ? 'disabled' : ''}>启动</button>
+                        <button class="btn btn-danger" onclick="stopInstance('${instance.uuid}')" ${instance.status === 'stopped' ? 'disabled' : ''}>停止</button>
+                        <button class="btn btn-warning" onclick="restartInstance('${instance.uuid}')">重启</button>
+                        <button class="btn btn-primary" onclick="viewLogs('${instance.uuid}')">查看日志</button>
+                        <button class="btn btn-primary" onclick="changePort('${instance.uuid}')">更改端口</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function refreshInstances() {
+            loadInstances();
+        }
+
+        async function startInstance(instanceId) {
+            try {
+                const response = await fetch(`/api/mcsm/instances/${instanceId}/start`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('实例启动成功');
+                    loadInstances();
+                } else {
+                    alert(`启动失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`启动失败: ${error.message}`);
+            }
+        }
+
+        async function stopInstance(instanceId) {
+            try {
+                const response = await fetch(`/api/mcsm/instances/${instanceId}/stop`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('实例停止成功');
+                    loadInstances();
+                } else {
+                    alert(`停止失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`停止失败: ${error.message}`);
+            }
+        }
+
+        async function restartInstance(instanceId) {
+            try {
+                const response = await fetch(`/api/mcsm/instances/${instanceId}/restart`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('实例重启成功');
+                    loadInstances();
+                } else {
+                    alert(`重启失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`重启失败: ${error.message}`);
+            }
+        }
+
+        async function viewLogs(instanceId) {
+            try {
+                const response = await fetch(`/api/mcsm/instances/${instanceId}/log?lines=100`, {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const logContainer = document.getElementById('logContainer');
+                    logContainer.textContent = result.data.map(log => `${log.time} - ${log.text}`).join('\n');
+                    showModal('logModal');
+                } else {
+                    alert(`获取日志失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`获取日志失败: ${error.message}`);
+            }
+        }
+
+        async function changePort(instanceId) {
+            const newPort = prompt('请输入新的端口号 (1-65535):');
+            if (!newPort) return;
+            
+            const port = parseInt(newPort);
+            if (isNaN(port) || port < 1 || port > 65535) {
+                alert('端口号必须是1-65535之间的数字');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/mcsm/instances/${instanceId}/port`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ port })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('端口更改成功');
+                    loadInstances();
+                } else {
+                    alert(`更改失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`更改失败: ${error.message}`);
+            }
+        }
+
+        async function loadUsers() {
+            const container = document.getElementById('users-container');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                const response = await fetch('/api/mcsm/users', {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayUsers(result.data);
+                } else {
+                    container.innerHTML = `<div class="error">${result.message}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">加载失败: ${error.message}</div>`;
+            }
+        }
+
+        function displayUsers(users) {
+            const container = document.getElementById('users-container');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="loading">没有找到用户</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>权限</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${users.map(user => `
+                            <tr>
+                                <td>${user.userName}</td>
+                                <td>${user.permission}</td>
+                                <td>
+                                    <button class="btn btn-danger" onclick="deleteUser('${user.uuid}')">删除</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function refreshUsers() {
+            loadUsers();
+        }
+
+        function showCreateUserModal() {
+            showModal('createUserModal');
+        }
+
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const userData = {
+                username: formData.get('username'),
+                password: formData.get('password'),
+                permission: formData.get('permission')
+            };
+            
+            try {
+                const response = await fetch('/api/mcsm/users', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('用户创建成功');
+                    closeModal('createUserModal');
+                    e.target.reset();
+                    loadUsers();
+                } else {
+                    alert(`创建失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`创建失败: ${error.message}`);
+            }
+        });
+
+        async function deleteUser(userId) {
+            if (!confirm('确定要删除这个用户吗？')) return;
+            
+            try {
+                const response = await fetch(`/api/mcsm/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('用户删除成功');
+                    loadUsers();
+                } else {
+                    alert(`删除失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`删除失败: ${error.message}`);
+            }
+        }
+
+        async function loadBindings() {
+            const container = document.getElementById('bindings-container');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                const instancesResponse = await fetch('/api/mcsm/instances', {
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const instancesResult = await instancesResponse.json();
+                
+                if (instancesResult.success) {
+                    const instances = instancesResult.data;
+                    let bindingsHtml = '';
+                    
+                    for (const instance of instances) {
+                        const usersResponse = await fetch(`/api/mcsm/instances/${instance.uuid}/users`, {
+                            headers: {
+                                'Authorization': `Bearer ${adminToken}`
+                            }
+                        });
+                        
+                        const usersResult = await usersResponse.json();
+                        
+                        if (usersResult.success && usersResult.data.length > 0) {
+                            bindingsHtml += `
+                                <div class="binding-item">
+                                    <h4>实例: ${instance.config.nickname} (${instance.uuid})</h4>
+                                    ${usersResult.data.map(user => `
+                                        <div class="binding-info">
+                                            <div>
+                                                <strong>用户:</strong> ${user.username} (${user.phone})
+                                                <div class="permissions">
+                                                    ${user.permissions.map(perm => `<span class="permission-tag">${perm}</span>`).join('')}
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-danger" onclick="unbindUser('${user.user_id}', '${instance.uuid}')">解绑</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                    if (bindingsHtml) {
+                        container.innerHTML = bindingsHtml;
+                    } else {
+                        container.innerHTML = '<div class="loading">没有找到绑定关系</div>';
+                    }
+                } else {
+                    container.innerHTML = `<div class="error">${instancesResult.message}</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">加载失败: ${error.message}</div>`;
+            }
+        }
+
+        function refreshBindings() {
+            loadBindings();
+        }
+
+        function showBindModal() {
+            showModal('bindModal');
+        }
+
+        document.getElementById('bindForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const bindData = {
+                userId: formData.get('userId'),
+                instanceId: formData.get('instanceId'),
+                permissions: Array.from(e.target.permissions.selectedOptions).map(option => option.value)
+            };
+            
+            try {
+                const response = await fetch(`/api/mcsm/users/${bindData.userId}/instances/${bindData.instanceId}/bind`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ permissions: bindData.permissions })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('绑定创建成功');
+                    closeModal('bindModal');
+                    e.target.reset();
+                    loadBindings();
+                } else {
+                    alert(`绑定失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`绑定失败: ${error.message}`);
+            }
+        });
+
+        async function unbindUser(userId, instanceId) {
+            if (!confirm('确定要解绑这个用户吗？')) return;
+            
+            try {
+                const response = await fetch(`/api/mcsm/users/${userId}/instances/${instanceId}/bind`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${adminToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('用户解绑成功');
+                    loadBindings();
+                } else {
+                    alert(`解绑失败: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`解绑失败: ${error.message}`);
+            }
+        }
+
+        async function loadSystemInfo() {
+            const container = document.getElementById('system-container');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+            
+            try {
+                const [infoResponse, statusResponse] = await Promise.all([
+                    fetch('/api/mcsm/system/info', {
+                        headers: { 'Authorization': `Bearer ${adminToken}` }
+                    }),
+                    fetch('/api/mcsm/system/status', {
+                        headers: { 'Authorization': `Bearer ${adminToken}` }
+                    })
+                ]);
+                
+                const infoResult = await infoResponse.json();
+                const statusResult = await statusResponse.json();
+                
+                if (infoResult.success && statusResult.success) {
+                    displaySystemInfo(infoResult.data, statusResult.data);
+                } else {
+                    container.innerHTML = `<div class="error">获取系统信息失败</div>`;
+                }
+            } catch (error) {
+                container.innerHTML = `<div class="error">加载失败: ${error.message}</div>`;
+            }
+        }
+
+        function displaySystemInfo(info, status) {
+            const container = document.getElementById('system-container');
+            
+            container.innerHTML = `
+                <div class="grid">
+                    <div class="card">
+                        <h3>系统信息</h3>
+                        <p><strong>版本:</strong> ${info.version || '未知'}</p>
+                        <p><strong>平台:</strong> ${info.platform || '未知'}</p>
+                        <p><strong>架构:</strong> ${info.arch || '未知'}</p>
+                    </div>
+                    <div class="card">
+                        <h3>系统状态</h3>
+                        <p><strong>CPU使用率:</strong> ${status.cpu || '未知'}%</p>
+                        <p><strong>内存使用率:</strong> ${status.memory || '未知'}%</p>
+                        <p><strong>磁盘使用率:</strong> ${status.disk || '未知'}%</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function refreshSystemInfo() {
+            loadSystemInfo();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadInstances();
+        });
+    </script>
+</body>
+</html>

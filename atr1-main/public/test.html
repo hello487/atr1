@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>云服务器后端API测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .api-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .endpoint-method {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #3498db;
+            color: white;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin: 10px 10px 10px 0;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #219653;
+        }
+        
+        .response {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>云服务器后端API测试</h1>
+            <p class="subtitle">测试Node.js后端服务提供的API接口</p>
+        </header>
+        
+        <section class="api-section">
+            <h2 class="section-title">服务器配置接口</h2>
+            
+            <div class="endpoint">
+                <span class="endpoint-method">GET</span>
+                <span class="endpoint-path">/api/servers</span>
+                <p>获取所有服务器配置</p>
+                <button class="btn" onclick="getServers()">测试接口</button>
+                <div id="servers-response" class="response" style="display: none;"></div>
+            </div>
+            
+            <div class="endpoint">
+                <span class="endpoint-method">GET</span>
+                <span class="endpoint-path">/api/servers/1</span>
+                <p>获取ID为1的服务器配置</p>
+                <button class="btn" onclick="getServer(1)">测试接口</button>
+                <div id="server-response" class="response" style="display: none;"></div>
+            </div>
+        </section>
+        
+        <section class="api-section">
+            <h2 class="section-title">价格计算器</h2>
+            
+            <div class="endpoint">
+                <span class="endpoint-method">POST</span>
+                <span class="endpoint-path">/api/calculate</span>
+                <p>计算自定义服务器配置的价格</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cpu">CPU核心数</label>
+                        <input type="number" id="cpu" value="4" min="1" max="32">
+                    </div>
+                    <div class="form-group">
+                        <label for="memory">内存(GB)</label>
+                        <input type="number" id="memory" value="16" min="1" max="128">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="disk">硬盘(GB)</label>
+                        <input type="number" id="disk" value="500" min="10" max="10000">
+                    </div>
+                    <div class="form-group">
+                        <label for="bandwidth">带宽(Mbps)</label>
+                        <input type="number" id="bandwidth" value="100" min="1" max="1000">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ports">端口数量</label>
+                        <input type="number" id="ports" value="5" min="1" max="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="months">购买月数</label>
+                        <input type="number" id="months" value="12" min="1" max="36">
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="calculatePrice()">计算价格</button>
+                <div id="calculate-response" class="response" style="display: none;"></div>
+            </div>
+        </section>
+        
+        <section class="api-section">
+            <h2 class="section-title">订单接口</h2>
+            
+            <div class="endpoint">
+                <span class="endpoint-method">POST</span>
+                <span class="endpoint-path">/api/order</span>
+                <p>创建新订单</p>
+                
+                <div class="form-group">
+                    <label for="serverId">服务器配置ID</label>
+                    <select id="serverId">
+                        <option value="1">入门型 (1核2GB)</option>
+                        <option value="2" selected>标准型 (2核4GB)</option>
+                        <option value="3">高性能型 (4核16GB)</option>
+                        <option value="4">企业型 (8核32GB)</option>
+                    </select>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="customerName">客户姓名</label>
+                        <input type="text" id="customerName" value="张三">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">客户邮箱</label>
+                        <input type="email" id="customerEmail" value="zhangsan@example.com">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="customerPhone">客户电话</label>
+                    <input type="text" id="customerPhone" value="13800138000">
+                </div>
+                
+                <button class="btn btn-success" onclick="createOrder()">创建订单</button>
+                <div id="order-response" class="response" style="display: none;"></div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>云服务器售卖系统后端API测试页面</p>
+            <p>© 2025 云服务器系统</p>
+        </footer>
+    </div>
+
+    <script>
+        // 显示响应结果
+        function showResponse(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.style.display = 'block';
+        }
+        
+        // 获取所有服务器配置
+        function getServers() {
+            fetch('/api/servers')
+                .then(response => response.json())
+                .then(data => showResponse('servers-response', data))
+                .catch(error => {
+                    showResponse('servers-response', { error: error.message });
+                });
+        }
+        
+        // 获取特定服务器配置
+        function getServer(id) {
+            fetch(`/api/servers/${id}`)
+                .then(response => response.json())
+                .then(data => showResponse('server-response', data))
+                .catch(error => {
+                    showResponse('server-response', { error: error.message });
+                });
+        }
+        
+        // 计算价格
+        function calculatePrice() {
+            const data = {
+                cpu: parseInt(document.getElementById('cpu').value),
+                memory: parseInt(document.getElementById('memory').value),
+                disk: parseInt(document.getElementById('disk').value),
+                bandwidth: parseInt(document.getElementById('bandwidth').value),
+                ports: parseInt(document.getElementById('ports').value),
+                months: parseInt(document.getElementById('months').value)
+            };
+            
+            fetch('/api/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => showResponse('calculate-response', data))
+            .catch(error => {
+                showResponse('calculate-response', { error: error.message });
+            });
+        }
+        
+        // 创建订单
+        function createOrder() {
+            const data = {
+                serverId: parseInt(document.getElementById('serverId').value),
+                cpu: 2, // 简化处理，实际应该根据选择的服务器配置动态设置
+                memory: 4,
+                disk: 100,
+                bandwidth: 200,
+                ports: 5,
+                months: 12,
+                customerInfo: {
+                    name: document.getElementById('customerName').value,
+                    email: document.getElementById('customerEmail').value,
+                    phone: document.getElementById('customerPhone').value
+                }
+            };
+            
+            fetch('/api/order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => showResponse('order-response', data))
+            .catch(error => {
+                showResponse('order-response', { error: error.message });
+            });
+        }
+    </script>
+</body>
+</html>
